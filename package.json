@@ -1,11 +1,12 @@
 {
-  "name": "formatio.rodelar",
+  "name": "rodelar",
   "version": "1.0.50",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "bun run --watch src/index.ts"
   },
   "dependencies": {
+    "bullmq": "^5.12.14",
     "elysia": "latest"
   },
   "devDependencies": {

@@ -1,0 +1,14 @@
+name: "rodelar"
+
+services:
+  redis:
+    image: redis:alpine
+    ports:
+      - 6379:6379
+    volumes:
+      - redis_volume:/root/redis
+    environment:
+      REDIS_ARGS: "--requirepass password --user username on >password ~* allcommands --user default off nopass nocommands"
+
+volumes:
+  redis_volume:
