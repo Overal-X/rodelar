@@ -1,15 +1,6 @@
 import { ConnectionOptions, Job, Queue, Worker } from "bullmq";
 
-interface IPublishArgs {
-  messageId?: string;
-  queue: string;
-  message: Record<string, string>;
-}
-
-interface ISubscribeArgs<T = unknown> {
-  queue: string;
-  callback: (data: T) => void;
-}
+import { IPublishArgs, ISubscribeArgs } from "./queue.type";
 
 export class QueueService {
   constructor(private connection: ConnectionOptions) {}

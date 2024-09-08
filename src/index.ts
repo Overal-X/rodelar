@@ -1,24 +1,19 @@
+import { Worker } from "bullmq";
 import { Elysia, t } from "elysia";
 
+import { MessageDto } from "./dto";
+import { REDIS_HOST, REDIS_PASSWORD, REDIS_PORT, REDIS_USERNAME } from "./env";
 import { QueueService } from "./queue.service";
-
-enum Action {
-  SUBSCRIBE = "SUBSCRIBE",
-  PUBLISH = "PUBLISH",
-}
-
-const MessageDto = t.Object({
-  action: t.Enum(Action),
-  event: t.String(),
-  payload: t.Optional(t.Any()),
-});
+import { Action } from "./type";
 
 const queueService = new QueueService({
-  host: "localhost",
-  port: 6379,
-  // username: "user",
-  // password: "password",
+  host: REDIS_HOST,
+  port: REDIS_PORT,
+  username: REDIS_USERNAME,
+  password: REDIS_PASSWORD,
 });
+
+const subscriptionPerConnection: Record<string, Worker> = {};
 
 const app = new Elysia()
   .ws("/ws", {
@@ -29,25 +24,30 @@ const app = new Elysia()
     },
     close(ws) {
       console.log("disconnection from : ", ws.id);
+
+      subscriptionPerConnection[ws.id]?.close();
+      delete subscriptionPerConnection[ws.id];
     },
     async message(ws, message) {
       switch (message.action) {
         case Action.SUBSCRIBE:
-          queueService.subscribe({
+          const subscription = queueService.subscribe({
             queue: message.event,
             callback: ws.send,
           });
+
+          subscriptionPerConnection[ws.id.toString()] = subscription;
+
           break;
         case Action.PUBLISH:
-          const messageId = crypto.randomUUID();
-
-          await queueService.publish({
+          const job = await queueService.publish({
             queue: message.event,
             message: message.payload,
-            messageId,
+            messageId: crypto.randomUUID(),
           });
 
-          ws.send({ messageId });
+          ws.send({ messageId: job.id });
+
           break;
         default:
           throw new Error("action not supported");
