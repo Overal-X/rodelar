@@ -7,7 +7,7 @@ export class QueueService {
 
   async publish(args: IPublishArgs) {
     return await new Queue(args.queue, { connection: this.connection }).add(
-      args.messageId || "no-msg-id",
+      crypto.randomUUID(),
       args.message
     );
   }

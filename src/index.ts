@@ -17,7 +17,10 @@ const subscriptionPerConnection: Record<string, Worker> = {};
 
 const app = new Elysia()
   .ws("/ws", {
-    headers: t.Object({ authorization: t.String() }),
+    query: t.Object({
+      apiKeyId: t.Optional(t.String()),
+      apiKey: t.Optional(t.String()),
+    }),
     body: MessageDto,
     open(ws) {
       console.log("connection from : ", ws.id);
@@ -33,20 +36,23 @@ const app = new Elysia()
         case Action.SUBSCRIBE:
           const subscription = queueService.subscribe({
             queue: message.event,
-            callback: ws.send,
+            callback: (data) => {
+              ws.send({
+                queue: message.event,
+                action: message.action,
+                message: data,
+              });
+            },
           });
 
           subscriptionPerConnection[ws.id.toString()] = subscription;
 
           break;
         case Action.PUBLISH:
-          const job = await queueService.publish({
+          await queueService.publish({
             queue: message.event,
             message: message.payload,
-            messageId: crypto.randomUUID(),
           });
-
-          ws.send({ messageId: job.id });
 
           break;
         default:
