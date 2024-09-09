@@ -38,7 +38,7 @@ const app = new Elysia()
             queue: message.event,
             callback: (data) => {
               ws.send({
-                queue: message.event,
+                event: message.event,
                 action: message.action,
                 message: data,
               });
@@ -51,7 +51,7 @@ const app = new Elysia()
         case Action.PUBLISH:
           await queueService.publish({
             queue: message.event,
-            message: message.payload,
+            message: message.message,
           });
 
           break;
