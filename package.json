@@ -4,7 +4,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "bun run --watch src/index.ts",
-    "build": "bun build ./src/index.ts --compile --outfile=./main"
+    "build": "bun build ./src/index.ts --compile --outfile=./rodelar"
   },
   "dependencies": {
     "bullmq": "^5.12.14",
